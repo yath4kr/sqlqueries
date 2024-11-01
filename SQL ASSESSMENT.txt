@@ -1,0 +1,115 @@
+---> CREATING TABLES
+CREATE TABLE Managers (
+    ManagerID INT PRIMARY KEY,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    Contact VARCHAR(15),
+    HireDate DATE,
+    Salary DECIMAL(10, 2)
+);
+
+CREATE TABLE Employees (
+    EmployeeID INT PRIMARY KEY,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    Contact VARCHAR(15),
+    HireDate DATE,
+    Salary DECIMAL(10, 2),
+    ManagerID INT,
+    FOREIGN KEY (ManagerID) REFERENCES Managers(ManagerID) ON DELETE SET NULL
+);
+
+show tables;
+
+---> INSERTING VALUES
+
+INSERT INTO Managers (ManagerID, FirstName, LastName, Email, Contact, HireDate, Salary)
+VALUES
+    (1, 'Rajesh', 'Sharma', 'rajesh.sharma@example.com', '9876543210', '2022-01-15', 80000.00),
+    (2, 'Priya', 'Singh', 'priya.singh@example.com', '8765432109', '2021-05-22', 85000.00),
+    (3, 'Vikram', 'Rao', 'vikram.rao@example.com', '7654321098', '2020-10-10', 90000.00);
+    
+INSERT INTO Employees (EmployeeID, FirstName, LastName, Email, Contact, HireDate, Salary, ManagerID)
+VALUES
+    (101, 'Amit', 'Patel', 'amit.patel@example.com', '9123456789', '2023-03-15', 55000.00, 1),
+    (102, 'Sneha', 'Gupta', 'sneha.gupta@example.com', '9987654321', '2023-06-01', 57000.00, 2),
+    (103, 'Rohit', 'Verma', 'rohit.verma@example.com', '9345678901', '2023-08-20', 52000.00, 1),
+    (104, 'Neha', 'Mehta', 'neha.mehta@example.com', '9456789012', '2023-07-25', 53000.00, 3),
+    (105, 'Kiran', 'Desai', 'kiran.desai@example.com', '9567890123', '2023-05-12', 56000.00, 2);
+
+Select * from employees;
+
+---> TASK 1.  getting all employee under each manager
+SELECT 
+    m.ManagerID,
+    CONCAT(m.FirstName, ' ', m.LastName) AS ManagerName,
+    e.EmployeeID,
+    CONCAT(e.FirstName, ' ', e.LastName) AS EmployeeName,
+    e.Email,
+    e.Contact,
+    e.HireDate,
+    e.Salary
+FROM 
+    Managers m
+LEFT JOIN 
+    Employees e ON m.ManagerID = e.ManagerID
+ORDER BY 
+    m.ManagerID, e.EmployeeID;
+
+---> TASK 2. getting how many employees come under any manager
+
+SELECT 
+    CONCAT(m.FirstName, ' ', m.LastName) AS ManagerName,
+    COUNT(e.EmployeeID) AS NumberOfEmployees
+FROM 
+    Managers m
+LEFT JOIN 
+    Employees e ON m.ManagerID = e.ManagerID
+WHERE 
+    CONCAT(m.FirstName, ' ', m.LastName) = 'Rajesh Sharma' 
+GROUP BY 
+    m.ManagerID, ManagerName;
+
+---> TASK 3. get all manager details
+select * from manager;
+
+--->  TASK 4. find any employee is there who has not been assigned to any manager
+
+SELECT 
+    EmployeeID,
+    CONCAT(FirstName, ' ', LastName) AS EmployeeName,
+    Email,
+    Contact,
+    HireDate,
+    Salary
+FROM 
+    Employees
+WHERE 
+    ManagerID IS NULL;
+    
+ 
+---> TASK 5. write a function to get fullname (first_name+last_name)
+
+DELIMITER //
+
+CREATE FUNCTION GetFullName(firstName VARCHAR(50), lastName VARCHAR(50))
+RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+    RETURN CONCAT(firstName, ' ', lastName);
+END //
+
+DELIMITER ;
+
+SELECT 
+    EmployeeID,
+    GetFullName(FirstName, LastName) AS EmployeeName,
+    Email,
+    Contact,
+    HireDate,
+    Salary
+FROM 
+    Employees;
+
